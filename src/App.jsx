@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Upload, FileText, CheckCircle, Play, Download, Loader2, ShieldAlert, Pause, Trash2, Eye, Zap, FolderOpen, Lock, LogOut, History, Settings, Save, Search, Globe, ShoppingBag, AlertCircle, RefreshCw, ExternalLink, Siren, User, Users, UserPlus, X, LayoutDashboard, ChevronRight, Calendar, Folder, FileSearch, ChevronDown, ArrowLeft, Store, Filter, Info, PlayCircle, Terminal, Activity, Cloud, LockKeyhole, ZapOff, Gauge, StopCircle, ImageIcon, Bot, RotateCcw } from 'lucide-react';
+import { Upload, FileText, CheckCircle, Play, Download, Loader2, ShieldAlert, Pause, Trash2, Eye, Zap, FolderOpen, Lock, LogOut, History, Settings, Save, Search, Globe, ShoppingBag, AlertCircle, RefreshCw, ExternalLink, Siren, User, Users, UserPlus, X, LayoutDashboard, ChevronRight, Calendar, Folder, FileSearch, ChevronDown, ArrowLeft, Store, Filter, Info, PlayCircle, Terminal, Activity, Cloud, LockKeyhole, ZapOff, Gauge, StopCircle, ImageIcon, Bot } from 'lucide-react';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, where, getDocs, deleteDoc, doc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
 
@@ -12,7 +12,7 @@ const APP_CONFIG = {
   FIXED_PASSWORD: 'admin123',
   API_TIMEOUT: 30000,
   RETRY_LIMIT: 8,
-  VERSION: '11.0.0-UX-Fix'
+  VERSION: '10.3.0-PerfectUI'
 };
 
 const parseCSV = (text) => {
@@ -109,7 +109,7 @@ async function analyzeItemRisk(itemData, apiKey, retryCount = 0) {
 
 /**
  * ============================================================================
- * UI Components
+ * UI Components (Designer Edition)
  * ============================================================================
  */
 
@@ -161,7 +161,7 @@ const NavButton = ({ icon: Icon, label, id, active, onClick }) => (
 const SessionStatusBadge = ({ status }) => {
   if (status === 'completed') return <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full font-bold border border-emerald-200">完了</span>;
   if (status === 'processing') return <span className="text-[10px] bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-bold border border-blue-200 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin"/> 検査中</span>;
-  if (status === 'aborted' || status === 'paused') return <span className="text-[10px] bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded-full font-bold border border-amber-200">中断</span>;
+  if (status === 'aborted' || status === 'paused') return <span className="text-[10px] bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full font-bold border border-slate-200">中断</span>;
   return <span className="text-[10px] bg-slate-50 text-slate-400 px-2.5 py-0.5 rounded-full border border-slate-200">{status || '不明'}</span>;
 };
 
@@ -214,7 +214,8 @@ const LoginView = ({ onLogin }) => {
   );
 };
 
-const ResultTableWithTabs = ({ items, currentUser, title, onBack, onReset, showDownload = true }) => {
+// --- ブラッシュアップされた結果テーブル (ゆったりレイアウト) ---
+const ResultTableWithTabs = ({ items, currentUser, title, onBack, showDownload = true }) => {
   const [filter, setFilter] = useState('all'); 
 
   const filteredItems = useMemo(() => {
@@ -256,45 +257,56 @@ const ResultTableWithTabs = ({ items, currentUser, title, onBack, onReset, showD
     document.body.removeChild(link);
   };
 
+  // ソース情報を適切に表示するヘルパー
   const renderSource = (item) => {
     const src = item.source || item.sourceFile;
     if (src && src.startsWith('http')) {
-      return <a href={src} target="_blank" rel="noreferrer" className="flex flex-col items-center gap-1 group/link"><div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl group-hover/link:bg-blue-100"><Store className="w-5 h-5"/></div><span className="text-[10px] font-bold text-slate-400">SHOP</span></a>;
+      return (
+        <div className="flex flex-col items-center justify-center gap-1.5">
+           <a href={src} target="_blank" rel="noreferrer" className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors shadow-sm hover:shadow" title="ショップへ移動">
+             <Store className="w-5 h-5"/>
+           </a>
+           <span className="text-[10px] font-bold text-slate-400 tracking-wide">SHOP</span>
+        </div>
+      );
     }
-    return <div className="flex flex-col items-center gap-1"><div className="p-2.5 bg-slate-100 text-slate-500 rounded-xl"><FileText className="w-5 h-5"/></div><span className="text-[10px] font-bold text-slate-400">CSV</span></div>;
+    return (
+      <div className="flex flex-col items-center justify-center gap-1.5">
+         <div className="p-2.5 bg-slate-100 text-slate-500 rounded-xl" title={src || 'CSVファイル'}>
+           <FileText className="w-5 h-5"/>
+         </div>
+         <span className="text-[10px] font-bold text-slate-400 tracking-wide">CSV</span>
+      </div>
+    );
   };
 
   return (
     <div className="h-full flex flex-col animate-in fade-in duration-500">
       {/* Header */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
           {onBack && (
-            <button onClick={onBack} className="group text-sm font-bold text-slate-500 hover:text-slate-800 flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:shadow transition-all">
+            <button onClick={onBack} className="group text-sm font-bold text-slate-500 hover:text-slate-800 flex items-center gap-2 bg-white px-5 py-2.5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform"/> 戻る
             </button>
           )}
-          {onReset && (
-             <button onClick={onReset} className="group text-sm font-bold text-blue-600 hover:text-blue-800 flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg transition-all">
-                <Search className="w-4 h-4"/> 新しいショップを検索
-             </button>
-          )}
           <div>
-            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-              <FileSearch className="w-6 h-6 text-blue-600"/>
+            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+              <FileSearch className="w-7 h-7 text-blue-600"/>
               {title}
             </h2>
+            <p className="text-sm text-slate-400 mt-1 font-medium ml-1">AI判定結果の詳細レポート</p>
           </div>
         </div>
         {showDownload && (
-          <button onClick={downloadCsv} className="text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 px-5 py-2.5 rounded-lg transition-all flex items-center gap-2 border border-slate-200 bg-white shadow-sm hover:border-blue-200">
+          <button onClick={downloadCsv} className="text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-xl transition-all flex items-center gap-2.5 border border-slate-200 bg-white shadow-sm hover:border-blue-200 hover:shadow-md">
             <Download className="w-4 h-4"/> 表示中をCSV出力
           </button>
         )}
       </div>
 
-      {/* Filter Tabs - Spacing Improved */}
-      <div className="flex gap-4 mb-6 overflow-x-auto pb-2 px-1">
+      {/* Filter Tabs */}
+      <div className="flex gap-3 mb-6 overflow-x-auto pb-2 px-1">
         <button onClick={() => setFilter('all')} className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${filter === 'all' ? 'bg-slate-800 text-white shadow-lg shadow-slate-200 scale-105' : 'bg-white text-slate-500 border border-slate-100 hover:bg-slate-50 hover:text-slate-700'}`}>
           すべて <span className="ml-1 opacity-70 text-xs font-normal">({counts.all})</span>
         </button>
@@ -309,7 +321,7 @@ const ResultTableWithTabs = ({ items, currentUser, title, onBack, onReset, showD
         </button>
       </div>
 
-      {/* Main Table Area */}
+      {/* Main Table Area - Spacious Design */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-100/50 overflow-hidden flex-1 flex flex-col">
         <div className="flex-1 overflow-y-auto">
            <table className="w-full text-left border-collapse">
@@ -325,14 +337,72 @@ const ResultTableWithTabs = ({ items, currentUser, title, onBack, onReset, showD
              <tbody className="divide-y divide-slate-100">
                {filteredItems.map((item, idx) => (
                  <tr key={idx} className={`group transition-all duration-300 hover:bg-blue-50/40 ${item.isCritical || item.is_critical ? 'bg-red-50/30' : ''}`}>
-                   <td className="px-8 py-6 align-top text-center"><div className="mt-1"><RiskBadge item={item}/></div></td>
-                   <td className="px-8 py-6 align-top"><div className="relative w-24 h-24 mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group-hover:shadow-md transition-all group-hover:scale-105">{item.imageUrl ? <a href={item.itemUrl} target="_blank" rel="noreferrer" className="block w-full h-full"><img src={item.imageUrl} alt="" className="w-full h-full object-contain p-1" /></a> : <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50"><ImageIcon className="w-8 h-8"/></div>}</div></td>
-                   <td className="px-8 py-6 align-top"><div className="font-bold text-slate-700 text-lg leading-snug mb-3 group-hover:text-blue-700 transition-colors">{item.productName}</div>{item.itemUrl && <a href={item.itemUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors shadow-sm"><ExternalLink className="w-3.5 h-3.5"/> 商品ページを確認</a>}</td>
-                   <td className="px-8 py-6 align-top">{(item.isCritical || item.is_critical) && <div className="inline-flex items-center gap-2 text-xs font-bold text-red-700 bg-red-100 px-4 py-2 rounded-xl mb-3 border border-red-200 shadow-sm"><Siren className="w-4 h-4"/> 重大な権利侵害の疑いあり</div>}<div className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-5 rounded-2xl border border-slate-100 shadow-inner">{item.reason || "特記事項なし"}</div></td>
-                   <td className="px-8 py-6 align-top text-center">{renderSource(item)}</td>
+                   
+                   {/* Risk Badge */}
+                   <td className="px-8 py-6 align-top text-center">
+                     <div className="mt-1">
+                       <RiskBadge item={item}/>
+                     </div>
+                   </td>
+
+                   {/* Image Thumbnail */}
+                   <td className="px-8 py-6 align-top">
+                      <div className="relative w-24 h-24 mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group-hover:shadow-md transition-all group-hover:scale-105">
+                        {item.imageUrl ? (
+                          <a href={item.itemUrl} target="_blank" rel="noreferrer" className="block w-full h-full">
+                            <img src={item.imageUrl} alt="" className="w-full h-full object-contain p-1" />
+                          </a>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">
+                            <ImageIcon className="w-8 h-8"/>
+                          </div>
+                        )}
+                      </div>
+                   </td>
+
+                   {/* Product Name & Link */}
+                   <td className="px-8 py-6 align-top">
+                      <div className="font-bold text-slate-700 text-lg leading-snug mb-3 group-hover:text-blue-700 transition-colors">
+                        {item.productName}
+                      </div>
+                      {item.itemUrl && (
+                        <a href={item.itemUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors shadow-sm">
+                          <ExternalLink className="w-3.5 h-3.5"/> 商品ページを確認
+                        </a>
+                      )}
+                   </td>
+
+                   {/* AI Reason */}
+                   <td className="px-8 py-6 align-top">
+                      {(item.isCritical || item.is_critical) && (
+                        <div className="inline-flex items-center gap-2 text-xs font-bold text-red-700 bg-red-100 px-4 py-2 rounded-xl mb-3 border border-red-200 shadow-sm">
+                          <Siren className="w-4 h-4"/>
+                          重大な権利侵害の疑いあり
+                        </div>
+                      )}
+                      <div className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-5 rounded-2xl border border-slate-100 shadow-inner">
+                        {item.reason || "特記事項なし"}
+                      </div>
+                   </td>
+
+                   {/* Source Info */}
+                   <td className="px-8 py-6 align-top text-center">
+                      {renderSource(item)}
+                   </td>
+
                  </tr>
                ))}
-               {filteredItems.length === 0 && <tr><td colSpan="5" className="py-32 text-center"><div className="inline-flex p-6 bg-slate-50 rounded-full mb-4"><Search className="w-8 h-8 text-slate-300"/></div><p className="text-slate-400 font-bold text-lg">該当する商品は見つかりませんでした</p></td></tr>}
+               {filteredItems.length === 0 && (
+                 <tr>
+                   <td colSpan="5" className="py-32 text-center">
+                     <div className="inline-flex p-6 bg-slate-50 rounded-full mb-4">
+                       <Search className="w-8 h-8 text-slate-300"/>
+                     </div>
+                     <p className="text-slate-400 font-bold text-lg">該当する商品は見つかりませんでした</p>
+                     <p className="text-slate-300 text-sm mt-2">条件を変更して再度お試しください</p>
+                   </td>
+                 </tr>
+               )}
              </tbody>
            </table>
         </div>
@@ -371,10 +441,10 @@ const DashboardView = ({ sessions, onNavigate, onResume, onForceStop, onInspectS
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
       <div className="flex justify-between items-end">
-        <div><h2 className="text-3xl font-bold text-slate-800 tracking-tight">Dashboard</h2><p className="text-slate-500 mt-1 font-medium">現在のパトロール状況サマリー</p></div>
-        <button onClick={() => onNavigate('url')} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 shadow-lg shadow-slate-200 hover:shadow-xl transition-all flex items-center gap-2 active:scale-95"><Search className="w-5 h-5" /> 新規チェックを開始</button>
+        <div><h2 className="text-3xl font-bold text-slate-800 tracking-tight">Dashboard</h2><p className="text-sm text-slate-500 mt-1">現在のパトロール状況サマリー</p></div>
+        <button onClick={() => onNavigate('url')} className="bg-slate-900 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-slate-800 shadow-lg flex items-center gap-2 text-sm active:scale-95 transition-all"><Search className="w-4 h-4" /> 新規チェック</button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard title="本日の検査数" value={stats.counts.todayChecks} icon={RefreshCw} color="bg-blue-500 text-blue-500" onClick={() => setDrillDownType('today')} />
@@ -382,27 +452,27 @@ const DashboardView = ({ sessions, onNavigate, onResume, onForceStop, onInspectS
         <StatCard title="高リスク(累計)" value={stats.counts.totalHigh} icon={AlertCircle} color="bg-red-500 text-red-500" onClick={() => setDrillDownType('high')} />
         <StatCard title="総検査商品数" value={stats.counts.totalChecks} icon={History} color="bg-slate-500 text-slate-500" onClick={() => setDrillDownType('all')} />
       </div>
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-lg shadow-slate-100 overflow-hidden">
-        <div className="p-6 border-b border-slate-50 flex justify-between items-center"><h3 className="font-bold text-lg text-slate-700">最新の検査セッション</h3><button onClick={() => onNavigate('history')} className="text-sm font-medium text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">履歴一覧へ</button></div>
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-100 flex justify-between items-center"><h3 className="font-bold text-slate-700">最新の検査セッション</h3><button onClick={() => onNavigate('history')} className="text-xs font-bold text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded transition-colors">履歴一覧へ</button></div>
         <div className="divide-y divide-slate-50">
           {sessions.slice(0, 5).map((session) => (
-            <div key={session.id} onClick={() => onInspectSession(session)} className="p-5 hover:bg-slate-50/80 transition-colors flex items-center justify-between group cursor-pointer">
-              <div className="flex items-center gap-5">
-                <div className={`p-3 rounded-xl ${session.type === 'url' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'}`}>{session.type === 'url' ? <ShoppingBag className="w-6 h-6"/> : <FileText className="w-6 h-6"/>}</div>
+            <div key={session.id} onClick={() => onInspectSession(session)} className="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between group cursor-pointer">
+              <div className="flex items-center gap-4">
+                <div className={`p-2.5 rounded-lg ${session.type === 'url' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'}`}>{session.type === 'url' ? <ShoppingBag className="w-5 h-5"/> : <FileText className="w-5 h-5"/>}</div>
                 <div>
-                  <div className="flex items-center gap-3 mb-1"><p className="text-base font-bold text-slate-800 truncate max-w-md group-hover:text-blue-600 transition-colors">{session.target || '不明なターゲット'}</p>{session.status === 'processing' && (<div className="flex gap-2" onClick={e => e.stopPropagation()}><button onClick={() => onResume(session)} className="text-[10px] bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition-colors font-bold flex items-center gap-1"><Play className="w-3 h-3"/> 再開</button><button onClick={() => onForceStop(session.id)} className="text-[10px] bg-slate-200 text-slate-600 px-3 py-1 rounded-full hover:bg-red-100 hover:text-red-600 transition-colors font-bold flex items-center gap-1"><StopCircle className="w-3 h-3"/> 停止</button></div>)}</div>
-                  <div className="text-xs text-slate-400 flex gap-3"><span className="flex items-center gap-1.5"><User className="w-3 h-3"/> {session.user}</span><span className="flex items-center gap-1.5"><Calendar className="w-3 h-3"/> {session.createdAt ? new Date(session.createdAt.seconds * 1000).toLocaleString() : '-'}</span><SessionStatusBadge status={session.status} /></div>
+                  <div className="flex items-center gap-2 mb-0.5"><p className="text-sm font-bold text-slate-800 truncate max-w-xs group-hover:text-blue-600 transition-colors">{session.target || '不明'}</p>{session.status === 'processing' && (<div className="flex gap-1" onClick={e => e.stopPropagation()}><button onClick={() => onResume(session)} className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded hover:bg-blue-700">再開</button><button onClick={() => onForceStop(session.id)} className="text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded hover:bg-red-100 hover:text-red-600">停止</button></div>)}</div>
+                  <div className="text-[10px] text-slate-400 flex gap-2"><span className="flex items-center gap-1"><User className="w-3 h-3"/> {session.user}</span><span className="flex items-center gap-1"><Calendar className="w-3 h-3"/> {session.createdAt ? new Date(session.createdAt.seconds * 1000).toLocaleString() : '-'}</span><span className={`px-1.5 rounded ${session.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>{session.status === 'processing' ? '検査中' : session.status === 'completed' ? '完了' : '中断'}</span></div>
                 </div>
               </div>
               <div className="flex gap-2 items-center">
-                {session.summary?.critical > 0 && <span className="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-lg flex items-center gap-1.5 border border-purple-100"><Siren className="w-3 h-3"/> {session.summary.critical}</span>}
-                {session.summary?.high > 0 && <span className="px-3 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-lg border border-red-100">高: {session.summary.high}</span>}
-                <span className="px-3 py-1 bg-slate-50 text-slate-500 text-xs font-medium rounded-lg border border-slate-100">全: {session.summary?.total}</span>
-                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-blue-400 ml-2 transition-colors"/>
+                {session.summary?.critical > 0 && <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-bold rounded flex items-center gap-1"><Siren className="w-3 h-3"/> {session.summary.critical}</span>}
+                {session.summary?.high > 0 && <span className="px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold rounded">高 {session.summary.high}</span>}
+                <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-medium rounded border border-slate-200">全 {session.summary?.total}</span>
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-400 ml-1"/>
               </div>
             </div>
           ))}
-          {sessions.length === 0 && <div className="p-12 text-center text-slate-400 font-medium">履歴がまだありません</div>}
+          {sessions.length === 0 && <div className="p-8 text-center text-slate-400 text-sm">履歴がまだありません</div>}
         </div>
       </div>
     </div>
@@ -412,25 +482,14 @@ const DashboardView = ({ sessions, onNavigate, onResume, onForceStop, onInspectS
 const HistoryView = ({ sessions, onResume, onForceStop, onDelete, currentUser, inspectSession }) => {
   const [selectedSession, setSelectedSession] = useState(null);
   useEffect(() => { if (inspectSession) setSelectedSession(inspectSession); }, [inspectSession]);
-  
   const groupedSessions = useMemo(() => {
-    const groups = {};
-    sessions.forEach(session => {
-      if (!session.createdAt) return;
-      const date = new Date(session.createdAt.seconds * 1000);
-      const monthKey = `${date.getFullYear()}年${date.getMonth() + 1}月`;
-      const dayKey = `${date.getDate()}日`;
-      if (!groups[monthKey]) groups[monthKey] = {};
-      if (!groups[monthKey][dayKey]) groups[monthKey][dayKey] = [];
-      groups[monthKey][dayKey].push(session);
-    });
-    return groups;
+    const groups = {}; sessions.forEach(session => {
+      if (!session.createdAt) return; const date = new Date(session.createdAt.seconds * 1000); const monthKey = `${date.getFullYear()}年${date.getMonth() + 1}月`; const dayKey = `${date.getDate()}日`;
+      if (!groups[monthKey]) groups[monthKey] = {}; if (!groups[monthKey][dayKey]) groups[monthKey][dayKey] = []; groups[monthKey][dayKey].push(session);
+    }); return groups;
   }, [sessions]);
-
-  const [expandedMonths, setExpandedMonths] = useState({});
-  const [expandedDays, setExpandedDays] = useState({});
-  const toggleMonth = (m) => setExpandedMonths(p => ({...p, [m]: !p[m]}));
-  const toggleDay = (d) => setExpandedDays(p => ({...p, [d]: !p[d]}));
+  const [expandedMonths, setExpandedMonths] = useState({}); const [expandedDays, setExpandedDays] = useState({});
+  const toggleMonth = (m) => setExpandedMonths(p => ({...p, [m]: !p[m]})); const toggleDay = (d) => setExpandedDays(p => ({...p, [d]: !p[d]}));
 
   if (selectedSession) {
     return (
@@ -455,7 +514,7 @@ const HistoryView = ({ sessions, onResume, onForceStop, onDelete, currentUser, i
     <div className="h-full flex flex-col animate-in fade-in duration-500">
       <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><FolderOpen className="w-8 h-8 text-blue-600"/> 検査履歴フォルダ</h2>
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex-1 overflow-y-auto p-6">
-        {Object.keys(groupedSessions).length === 0 && <div className="text-center text-slate-400 mt-20 font-medium">履歴フォルダは空です</div>}
+        {Object.keys(groupedSessions).length === 0 && <div className="text-center text-slate-400 mt-20 text-sm">履歴フォルダは空です</div>}
         {Object.keys(groupedSessions).sort((a,b) => b.localeCompare(a)).map(month => (
           <div key={month} className="mb-4">
             <div onClick={() => toggleMonth(month)} className="flex items-center gap-3 cursor-pointer p-3 hover:bg-slate-50 rounded-xl select-none text-slate-700 font-bold text-lg transition-colors">
@@ -1029,7 +1088,6 @@ export default function App() {
     }
   };
 
-  // Handle inspecting a session from Dashboard
   const handleInspectSession = (session) => {
     setInspectSession(session);
     setActiveTab('history');
@@ -1050,7 +1108,7 @@ export default function App() {
           <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full">
             <User className="w-4 h-4 text-slate-500" />
             <span className="text-xs font-bold text-slate-700">{currentUser.name}</span>
-            <span className="text-[10px] px-1.5 py-0.5 bg-white rounded border border-slate-200 text-slate-500">{currentUser.role === 'admin' ? 'ADMIN' : 'STAFF'}</span>
+            <span className="text-[10px] px-1.5 py-0.5 bg-white rounded border border-slate-200 text-slate-500">{currentUser.role === 'admin' ? '管理者' : '担当者'}</span>
           </div>
           <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"><LogOut className="w-5 h-5" /></button>
         </div>
